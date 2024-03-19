@@ -48,6 +48,9 @@ def perform_id_mapping(aup_data_path, output_path):
     mapped_hgnc_symbols = pd.read_csv('resources/external/mapped_hgnc_symbols.tsv', sep='\t')
     mapping_dict = dict(zip(mapped_hgnc_symbols['From'], mapped_hgnc_symbols['To']))
     aup = idm.update_df_index_with_mappings(aup, mapping_dict, phosphosites=True)
+    
+    # Sort the updated DataFrame by index to organize the entries.
+    aup.sort_index(inplace=True)
 
     # Save the processed AUP data
     logging.info(f"Saving ID mapped AUP data to {output_path}.")

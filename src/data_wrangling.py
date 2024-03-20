@@ -162,6 +162,9 @@ def filter_lq_phosphosites(df, metadata, condition_col, n_rep=2, n_cond=1, p_nas
     if condition_col not in metadata.columns:
         logging.info(f"'metadata' does not contain '{condition_col}' column.")
 
+    # Filter metadata to include only samples that are present in df columns
+    metadata = metadata[metadata['sampleID'].isin(df.columns)]
+    
     # Split data by groups specified in the condition column
     grouped_data = {grp: df.loc[:, metadata.loc[metadata[condition_col] == grp, 'sampleID']] for grp in metadata[condition_col].unique()}
 

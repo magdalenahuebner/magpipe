@@ -132,7 +132,7 @@ def filter_lq_samples(df, metadata, p_quant=0.6, save_path=None):
     # Filter columns based on quantification threshold
     valid_cols = df_quant[df_quant >= p_quant].index
     filtered_df = df[valid_cols]
-    filtered_mdat = metadata[metadata['sampleID'].isin(valid_cols)]
+    filtered_mdat = metadata[metadata['sampleID'].isin(valid_cols)].reset_index(drop=True)
     
     # Log the number of samples removed and retained
     num_removed_samples = len(df.columns) - len(filtered_df.columns)

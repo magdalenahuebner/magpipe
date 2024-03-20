@@ -32,7 +32,7 @@ def rename_samples_based_on_metadata(df, metadata):
     df = df.reindex(columns=metadata.index)
     df.rename(columns=metadata['sampleID'].to_dict(), inplace=True)
     metadata.reset_index(drop=True, inplace=True)
-    return df
+    return df, metadata
 
 
 def filter_canonical_psts(df):

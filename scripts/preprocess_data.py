@@ -37,7 +37,7 @@ def preprocess_data(aup_data_path, metadata_path, output_path):
 
     # Step 1: Rename columns based on 'sampleID' in metadata if 'sampleID' column is present
     logging.info("Renaming samples based on metadata.")
-    aup = rename_samples_based_on_metadata(aup, metadata)
+    aup, metadata = rename_samples_based_on_metadata(aup, metadata)
 
     # Step 2: Filter for canonical phosphorylations
     logging.info("Filtering for canonical phosphorylations.")

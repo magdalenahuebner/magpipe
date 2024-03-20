@@ -17,8 +17,7 @@ def rename_samples_based_on_metadata(df, metadata):
     Returns:
     - The DataFrame with columns renamed.
     """
-    if 'sampleID' not in metadata.columns:
-        raise ValueError("Metadata does not contain 'sampleID' column.")
+    assert 'sampleID' in metadata.columns, "Metadata must include 'sampleID' column."
 
     if metadata.columns[0] == 'sampleID':
         metadata.set_index(metadata.columns[0], drop=False, inplace=True)
@@ -119,22 +118,16 @@ def filter_lq_samples(df, metadata, p_quant=0.6, save_path=None):
              1. The filtered DataFrame.
              2. The updated metadata DataFrame, corresponding to the filtered data.
     """
-    # Check if 'sampleID' column exists in metadata
-    if 'sampleID' not in metadata.columns:
-        logging.error("Error: 'mdat' does not contain 'sampleID' column.")
-    
-    # Calculate the quantified phosphosites for each column
+    assert 'sampleID' in metadata.columns, "Metadata must include 'sampleID' column."
+   
+    # Calculate and visualize the quantified phosphosites for each column 
     df_quant = 1 - df.isnull().mean()
-    
-    # Visualize quantification rates before filtering, optionally save the plot
     viz.plot_qc_samples(df, p_quant=p_quant, save_path=save_path)
 
     # Filter columns based on quantification threshold
     valid_cols = df_quant[df_quant >= p_quant].index
     filtered_df = df[valid_cols]
-    filtered_mdat = metadata[metadata['sampleID'].isin(valid_cols)].reset_index(drop=True)
-    
-    # Log the number of samples removed and retained
+    filtered_mdat = metadata[metadata['sampleID'].isin(valid_cols)].reset_index(drop=True)    
     num_removed_samples = len(df.columns) - len(filtered_df.columns)
     logging.info(f"Removed {num_removed_samples} low-quality samples. Retained {len(filtered_df.columns)} samples.")
     
@@ -158,31 +151,21 @@ def filter_lq_phosphosites(df, metadata, condition_col, n_rep=2, n_cond=1, p_nas
              1. filtered_data: The DataFrame after removing low-quality phosphosites.
              2. removed_psts: DataFrame of phosphosites removed due to poor quantification.
     """
-    # Ensure condition column is present in metadata
-    if condition_col not in metadata.columns:
-        logging.info(f"'metadata' does not contain '{condition_col}' column.")
+    assert condition_col in metadata.columns, f"Metadata does not contain '{condition_col}' column."
 
-    # Filter metadata to include only samples that are present in df columns
-    metadata = metadata[metadata['sampleID'].isin(df.columns)]
-    
     # Split data by groups specified in the condition column
+    metadata = metadata[metadata['sampleID'].isin(df.columns)]  # align metadata with df
     grouped_data = {grp: df.loc[:, metadata.loc[metadata[condition_col] == grp, 'sampleID']] for grp in metadata[condition_col].unique()}
 
-    # Initialize a DataFrame to store test results
-    test_results = pd.DataFrame(index=df.index, columns=grouped_data.keys())
-
     # Apply the conditions across each group
+    test_results = pd.DataFrame(index=df.index, columns=grouped_data.keys())
     for grp, grp_data in grouped_data.items():
         test_results[grp] = grp_data.apply(lambda x: x.count() >= n_rep, axis=1)
 
     # Determine phosphosites meeting the criteria
     valid_psts = (test_results.sum(axis=1) >= n_cond) | (df.isnull().mean(axis=1) <= p_nas)
-    
-    # Filter phosphosites based on the conditions
     filtered_data = df.loc[valid_psts]
     removed_psts = df.loc[~valid_psts]  # Phosphosites removed due to poor quantification
-
-    # Logging the number of phosphosites removed and retained
     logging.info(f"Removed {len(removed_psts)} low-quality phosphosites. Retained {len(filtered_data)} phosphosites out of {len(df)} total phosphosites.")
-
+    
     return filtered_data, removed_psts

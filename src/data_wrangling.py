@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 import logging
 
+import src.visualisation as viz
+
 
 def rename_samples_based_on_metadata(df, metadata):
     """
@@ -99,3 +101,41 @@ def log2_transform_and_clean(df):
     logging.info(f"Replaced {inf_count} -Inf values with NaN after log2 transformation, which is approximately {inf_percentage:.2f}% of all values.")
     
     return transformed_df
+
+
+def filter_lq_samples(df, metadata, p_quant=0.6, save_path=None):
+    """
+    Removes low quality samples in the dataset based on a quantification threshold. Samples with less than the specified
+    percentage of quantified phosphosites are removed.
+
+    Parameters:
+    - df (pd.DataFrame): DataFrame containing the data with columns as samples to be filtered.
+    - metadata (pd.DataFrame): DataFrame containing the metadata with 'sampleID' used for renaming columns in data.
+    - p_quant (float): The minimum percentage of quantified phosphosites per sample; defaults to 0.6 (60%).
+    - save_path (str, optional): If provided, the quantification plot will be saved to this path.
+
+    Returns:
+    - tuple: A tuple containing two elements:
+             1. The filtered DataFrame.
+             2. The updated metadata DataFrame, corresponding to the filtered data.
+    """
+    # Check if 'sampleID' column exists in metadata
+    if 'sampleID' not in metadata.columns:
+        logging.error("Error: 'mdat' does not contain 'sampleID' column.")
+    
+    # Calculate the quantified phosphosites for each column
+    df_quant = 1 - df.isnull().mean()
+    
+    # Visualize quantification rates before filtering, optionally save the plot
+    viz.plot_qc_samples(df, p_quant=p_quant, save_path=save_path)
+
+    # Filter columns based on quantification threshold
+    valid_cols = df_quant[df_quant >= p_quant].index
+    filtered_df = df[valid_cols]
+    filtered_mdat = metadata[metadata['sampleID'].isin(valid_cols)]
+    
+    # Log the number of samples removed and retained
+    num_removed_samples = len(df.columns) - len(filtered_df.columns)
+    logging.info(f"Removed {num_removed_samples} low-quality samples. Retained {len(filtered_df.columns)} samples.")
+    
+    return filtered_df, filtered_mdat

@@ -31,3 +31,32 @@ def plot_qc_samples(df, p_quant=0.6, save_path=None):
         logging.info(f"Plot saved to {save_path}")
     else:
         plt.show()
+
+
+def plot_normalisation_boxplots(df, df_norm, save_path=None):
+    """
+    Generates boxplots for each sample in the DataFrame.
+
+    Parameters:
+    - df (pd.DataFrame): DataFrame containing the data. Rows represent features, and columns represent samples.
+    - title (str): Title of the plot.
+    """
+    # Create boxplots for the original data
+    plt.figure(figsize=(12, 6))
+    df.boxplot(rot=90, fontsize=8)
+    plt.title('Before Normalisation')
+    plt.ylabel('Area under the Peak (AUP)')  # Rotate and resize sample names for better readability
+    plt.tight_layout()  # Adjust layout to make room for the rotated x-axis labels
+
+    # Create boxplots for the normalised data
+    plt.figure(figsize=(12, 6))
+    df_norm.boxplot(rot=90, fontsize=8)
+    plt.title('After Normalisation')
+    plt.ylabel('Area under the Peak (AUP)')  # Rotate and resize sample names for better readability
+    plt.tight_layout()  # Adjust layout to make room for the rotated x-axis labels
+
+    if save_path:
+        plt.savefig(save_path)
+        logging.info(f"QC plots saved to {save_path}")
+    else:
+        plt.show()

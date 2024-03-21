@@ -14,11 +14,11 @@ def preprocess_data(aup_data_path, metadata_path, output_path):
     filtering for canonical phosphorylations, removing duplicates, and applying log2 transformation.
 
     Parameters:
-    - aup_data_path: Path to the CSV file containing Area Under the Peak (AUP) data from phosphoproteomics experiments.
+    - aup_data_path: Path to the TSV file containing Area Under the Peak (AUP) data from phosphoproteomics experiments.
                      Rows represent phosphosites (or features), and columns represent samples.
-    - metadata_path: Path to the CSV file containing metadata for the samples. The first column must match the sample
+    - metadata_path: Path to the TSV file containing metadata for the samples. The first column must match the sample
                      names used in the AUP data file's columns.
-    - output_path:   Path where the preprocessed AUP data CSV file will be saved.
+    - output_path:   Path where the preprocessed AUP data TSV file will be saved.
 
     Returns:
     - None: The function saves the preprocessed data to a file specified by output_path.
@@ -37,7 +37,7 @@ def preprocess_data(aup_data_path, metadata_path, output_path):
 
     # Step 1: Rename columns based on 'sampleID' in metadata if 'sampleID' column is present
     logging.info("Renaming samples based on metadata.")
-    aup, metadata = dw.rename_samples_based_on_metadata(aup, metadata)
+    aup, _ = dw.rename_samples_based_on_metadata(aup, metadata)
 
     # Step 2: Filter for canonical phosphorylations
     logging.info("Filtering for canonical phosphorylations.")
@@ -50,14 +50,6 @@ def preprocess_data(aup_data_path, metadata_path, output_path):
     # Step 4: Log2 transform and clean data
     logging.info("Applying log2 transformation and cleaning data.")
     aup = dw.log2_transform_and_clean(aup)
-
-    # Step 5: QC - Exclude low-quality samples
-    logging.info("Running QC and excluding low-quality samples.")
-    aup, metadata = dw.filter_lq_samples(aup, metadata, p_quant=0.6, save_path='reports/figures/qc_plot_samples.png')
-
-    # Step 6: QC - Exclude low-quality phosphosites
-    logging.info("Running QC and excluding low-quality phosphosites.")
-    aup, _ = dw.filter_lq_phosphosites(aup, metadata, condition_col='perturbagen', n_rep=2, n_cond=1, p_nas=0.5)
 
     # Save the preprocessed AUP data
     logging.info(f"Saving preprocessed AUP data to {output_path}.")

@@ -7,13 +7,14 @@ import src.id_mapping as idm
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def perform_id_mapping(aup_data_path, output_path):
+def perform_id_mapping(aup_data_path, idmap_path, output_path):
     """
     Perform ID mapping on phosphoproteomics experiment data, updating protein IDs to HGNC symbols.
 
     Parameters:
-    - aup_data_path: Path to the CSV file containing Area Under the Peak (AUP) data from phosphoproteomics experiments.
+    - aup_data_path: Path to the TSV file containing Area Under the Peak (AUP) data from phosphoproteomics experiments.
                      Rows represent phosphosites (or features), and columns represent samples.
+    - idmap_path:    Path to the TSV file containing manually mapped protein IDs formatted as 'From\tTo'.
     - output_path:   Path where the preprocessed AUP data CSV file will be saved.
 
     Returns:
@@ -45,7 +46,7 @@ def perform_id_mapping(aup_data_path, output_path):
     # 4. Manually map remaining unmatched IDs
     logging.info("Processing manually mapped IDs.")
     # This assumes 'mapped_hgnc_symbols.tsv' is formatted as 'From\tTo'
-    mapped_hgnc_symbols = pd.read_csv('resources/external/mapped_hgnc_symbols.tsv', sep='\t')
+    mapped_hgnc_symbols = pd.read_csv(idmap_path, sep='\t')
     mapping_dict = dict(zip(mapped_hgnc_symbols['From'], mapped_hgnc_symbols['To']))
     aup = idm.update_df_index_with_mappings(aup, mapping_dict, phosphosites=True)
     
@@ -57,9 +58,9 @@ def perform_id_mapping(aup_data_path, output_path):
     aup.to_csv(output_path, sep='\t')
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        logging.error("Usage: python perform_id_mapping.py <aup_data_path> <output_path>")
+    if len(sys.argv) != 4:
+        logging.error("Usage: python perform_id_mapping.py <aup_data_path> <idmap_path> <output_path>")
         sys.exit(1)
     
-    aup_data_path, output_path = sys.argv[1:]
-    perform_id_mapping(aup_data_path, output_path)
+    aup_data_path, idmap_path, output_path = sys.argv[1:]
+    perform_id_mapping(aup_data_path, idmap_path, output_path)

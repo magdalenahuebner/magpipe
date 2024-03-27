@@ -79,7 +79,7 @@ paste("Total number of phosphosite measurements across samples: ", nrow(dpoa_res
 
 ## Step 4: Annotating DPOA Results with Additional Metrics
 
-Finally, we enrich the DPOA results with additional metrics, such as the total number of runs (n_runs), control counts (n_ctr), condition counts (n_cnd), and mean signals (meansig_ctr, meansig_cnd). These metrics provide further context for each phosphosite and facilitate deeper insights into the data.
+Finally, we enrich the DPOA results with additional metrics, such as the total number of runs (n_runs), signal mean and standard deviation for each phosphosite across all samples (p_mean, p_sd), control counts (n_ctr), condition counts (n_cnd), and mean signals (meansig_ctr, meansig_cnd). These metrics provide further context for each phosphosite and facilitate deeper insights into the data.
 
 ```{r}
 # Annotating DPOA results with additional metrics

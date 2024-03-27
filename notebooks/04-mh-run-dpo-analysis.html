@@ -468,29 +468,30 @@ paste(&quot;Total number of phosphosite measurements across samples: &quot;, nro
 <div id="step-4-annotating-dpoa-results-with-additional-metrics" class="section level2">
 <h2>Step 4: Annotating DPOA Results with Additional Metrics</h2>
 <p>Finally, we enrich the DPOA results with additional metrics, such as
-the total number of runs (n_runs), control counts (n_ctr), condition
-counts (n_cnd), and mean signals (meansig_ctr, meansig_cnd). These
-metrics provide further context for each phosphosite and facilitate
-deeper insights into the data.</p>
+the total number of runs (n_runs), signal mean and standard deviation
+for each phosphosite across all samples (p_mean, p_sd), control counts
+(n_ctr), condition counts (n_cnd), and mean signals (meansig_ctr,
+meansig_cnd). These metrics provide further context for each phosphosite
+and facilitate deeper insights into the data.</p>
 <pre class="r"><code># Annotating DPOA results with additional metrics
 final_res &lt;- add_dpoa_metrics(log2aup, mdat, dpoa_res, condition_col=&#39;perturbagen&#39;, control_name=&#39;control&#39;)
 
 # Displaying the first few rows of the annotated DPOA results
 head(final_res)</code></pre>
-<pre><code>##   phosphosite perturbagen fold_change    pval_eb error n_runs n_ctr meansig_ctr
-## 1  AAAS(S495)       AC220  0.15447973 0.41953275  &lt;NA&gt;    276    32    32.00981
-## 2 AAGAB(S310)       AC220 -0.53191215 0.53256947  &lt;NA&gt;    231    27    27.79445
-## 3 AAGAB(S311)       AC220 -0.45615297 0.54916130  &lt;NA&gt;    248    31    27.82547
-## 4   AAK1(S14)       AC220 -1.18543980 0.03922226  &lt;NA&gt;    270    32    29.46778
-## 5   AAK1(S21)       AC220 -0.04546289 0.86507462  &lt;NA&gt;    270    32    29.39182
-## 6  AAK1(S624)       AC220  0.06597695 0.94268278  &lt;NA&gt;    275    32    32.30141
-##   n_cnd meansig_cnd
-## 1     4    31.97437
-## 2     4    28.40761
-## 3     4    29.14591
-## 4     4    28.04328
-## 5     4    29.39308
-## 6     4    33.03882</code></pre>
+<pre><code>##   phosphosite perturbagen fold_change    pval_eb error n_runs   p_mean
+## 1  AAAS(S495)       AC220  0.15447973 0.41953275  &lt;NA&gt;    276 32.00308
+## 2 AAGAB(S310)       AC220 -0.53191215 0.53256947  &lt;NA&gt;    231 27.57531
+## 3 AAGAB(S311)       AC220 -0.45615297 0.54916130  &lt;NA&gt;    248 27.89691
+## 4   AAK1(S14)       AC220 -1.18543980 0.03922226  &lt;NA&gt;    270 29.44577
+## 5   AAK1(S21)       AC220 -0.04546289 0.86507462  &lt;NA&gt;    270 29.06233
+## 6  AAK1(S624)       AC220  0.06597695 0.94268278  &lt;NA&gt;    275 32.03858
+##        p_sd n_ctr meansig_ctr n_cnd meansig_cnd
+## 1 0.3987527    32    32.00981     4    31.97437
+## 2 1.4870228    27    27.79445     4    28.40761
+## 3 1.7592376    31    27.82547     4    29.14591
+## 4 1.1398263    32    29.46778     4    28.04328
+## 5 0.7904053    32    29.39182     4    29.39308
+## 6 2.0703991    32    32.30141     4    33.03882</code></pre>
 </div>
 </div>
 <div id="conclusion" class="section level1">

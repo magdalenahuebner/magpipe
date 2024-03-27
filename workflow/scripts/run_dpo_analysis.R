@@ -39,7 +39,7 @@ remove_low_quality_controls <- function(data, mdat, condition_col='condition', c
   keep <- rowSums(!is.na(ctr_data)) >= min_ctrs
   removed_ctrs <- data[!keep, , drop=FALSE]  # Data to add back later
   
-  return(list(filtered_data=data[keep, , drop=FALSE], removed_ctrs=removed_ctrs))
+  return(list(filtered_data=data[keep, , drop=FALSE], removed_ctrs=removed_ctrs[, ctr_samples, drop=FALSE]))
 }
 
 
@@ -184,8 +184,8 @@ add_dpoa_metrics <- function(data, mdat, dpoa, condition_col='condition', contro
   
   # Control samples: counts and mean signal
   control_samples <- which(mdat[[condition_col]] == control_name)
-  dpoa$n_ctr <- rowSums(!is.na(data[, control_samples]))
-  dpoa$meansig_ctr <- rowMeans(data[, control_samples], na.rm=TRUE)
+  dpoa$n_ctr <- rowSums(!is.na(data[, control_samples]))[dpoa$phosphosite]
+  dpoa$meansig_ctr <- rowMeans(data[, control_samples], na.rm=TRUE)[dpoa$phosphosite]
   
   # Unique conditions excluding control: counts and mean signal
   unique_conditions <- setdiff(unique(mdat[[condition_col]]), control_name)

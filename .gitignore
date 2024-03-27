@@ -75,6 +75,10 @@ target/
 # Jupyter NB Checkpoints
 .ipynb_checkpoints/
 
+# R Studio
+.RData
+.Rhistory
+
 # exclude data from source control by default
 /data/
 

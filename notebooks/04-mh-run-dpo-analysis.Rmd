@@ -1,0 +1,94 @@
+---
+title: "Differential phosphosite occupancy analysis (DPOA)"
+author: "Magdalena Huebner"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+This document outlines a detailed workflow for the analysis of phosphoproteomics data. Our goal is to perform Differential Phosphosite Occupancy Analysis (DPOA) utilising the Limma package. While traditionally used for differential gene expression studies, Limma can also be used for identifying changes in protein phosphorylation across various experimental conditions. This workflow is built upon custom functions provided in magpipeR.R.
+
+# Setup
+
+Let's begin by loading the necessary R packages and sourcing our script that contains essential functions for DPOA.
+
+```{r}
+source('../workflow/scripts/run_dpo_analysis.R')
+```
+
+# Data Preparation
+
+The analysis starts with loading the log2-transformed Area Under the Peak (log2aup) data and corresponding metadata. The metadata should contain information about sample conditions and potentially batch effects, which are crucial for accurate differential analysis.
+
+```{r}
+# Loading data and metadata
+log2aup <- read.csv('../workspace/normalised_data.tsv', sep='\t', row.names=1)
+mdat <- read.csv('../resources/raw_data/metadata.tsv', sep='\t')
+
+# Aligning data and metadata
+mdat <- mdat[mdat$sampleID %in% colnames(log2aup), ]
+
+# Displaying the content of the metadata
+head(mdat)
+```
+
+# Differential Phosphosite Occupancy Analysis using Limma
+
+## Step 1: Quality Control - Removing Low-Quality Phosphosites
+
+We begin by excluding phosphosites with insufficient data points in control samples. This step ensures that the subsequent analysis is based on reliable and adequately quantified phosphosites.
+
+```{r}
+# Removing phosphosites with insufficient data in control samples
+qc_res <- remove_low_quality_controls(log2aup, mdat, condition_col='perturbagen')
+
+paste("Removed phosphosites: ", nrow(qc_res$removed_ctrs))
+paste("Retained phosphosites: ", nrow(qc_res$filtered_data))
+
+# Displaying the first few rows of the removed phosphosite data
+head(qc_res$removed_ctrs[, 1:4])
+```
+
+## Step 2: Performing DPOA
+
+Next, we apply Limma to perform the differential analysis. This method identifies significant changes in phosphosite occupancy across different experimental conditions.
+
+```{r}
+# Performing DPOA using limma
+dpoa_res <- calculate_dpo_limma(qc_res$filtered_data, mdat, condition_col='perturbagen')
+
+# Displaying the first few rows of DPOA results
+head(dpoa_res)
+```
+
+## Step 3: Adding Back Low-Quality Phosphosites
+
+In this step, phosphosites previously excluded due to poor quantification in control samples are added back into the analysis. This allows for a comprehensive overview of all phosphosites, including those with potential data quality issues.
+
+```{r}
+# Adding back phosphosites with insufficient data in control samples
+dpoa_res <- add_back_controls(dpoa_res, qc_res$removed_ctrs, mdat, condition_col='perturbagen')
+
+paste("Total number of phosphosite measurements across samples: ", nrow(dpoa_res))
+```
+
+## Step 4: Annotating DPOA Results with Additional Metrics
+
+Finally, we enrich the DPOA results with additional metrics, such as the total number of runs (n_runs), control counts (n_ctr), condition counts (n_cnd), and mean signals (meansig_ctr, meansig_cnd). These metrics provide further context for each phosphosite and facilitate deeper insights into the data.
+
+```{r}
+# Annotating DPOA results with additional metrics
+final_res <- add_dpoa_metrics(log2aup, mdat, dpoa_res, condition_col='perturbagen', control_name='control')
+
+# Displaying the first few rows of the annotated DPOA results
+head(final_res)
+```
+
+# Conclusion
+
+The workflow presented here offers a structured approach to analysing phosphoproteomics data, from initial quality control steps to differential analysis and result annotation. By employing the Limma package and custom functions, we can effectively identify and interpret significant changes in phosphosite occupancy, providing valuable insights into the underlying biological processes.

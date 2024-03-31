@@ -51,7 +51,7 @@ def perform_qc_and_normalise(aup_data_path, metadata_path, output_path, plot_dir
 
 if __name__ == "__main__":
     if len(sys.argv) != 5:
-        print("Usage: python preprocess_data.py <aup_data_path> <metadata_path> <output_path> <plot_dir>")
+        logging.error("Usage: python preprocess_data.py <aup_data_path> <metadata_path> <output_path> <plot_dir>")
         sys.exit(1)
     
     aup_data_path, metadata_path, output_path, plot_dir = sys.argv[1:]

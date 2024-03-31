@@ -57,7 +57,7 @@ def preprocess_data(aup_data_path, metadata_path, output_path):
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print("Usage: python preprocess_data.py <aup_data_path> <metadata_path> <output_path>")
+        logging.error("Usage: python preprocess_data.py <aup_data_path> <metadata_path> <output_path>")
         sys.exit(1)
     
     aup_data_path, metadata_path, output_path = sys.argv[1:]

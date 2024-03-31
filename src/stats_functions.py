@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 def median_scaling(df, target_median=None):
@@ -23,3 +24,19 @@ def median_scaling(df, target_median=None):
     scaled_df = df.apply(lambda x: (x - x.median()) + target_median, axis=0)
     
     return scaled_df
+
+
+def z_score(fc, dist_mean, n, dist_std):
+    """
+    Calculates the Z-score.
+
+    Parameters:
+    - fc: Fold change value.
+    - dist_mean: Mean of the distribution.
+    - n: Sample size.
+    - dist_std: Standard deviation of the distribution.
+
+    Returns:
+    - Z-score.
+    """
+    return (fc - dist_mean) * np.sqrt(n) / dist_std

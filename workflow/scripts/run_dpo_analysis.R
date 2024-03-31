@@ -170,8 +170,9 @@ add_back_controls <- function(dpoa_res, removed_ctrs, mdat, condition_col='condi
 #'                     differentiate controls from treatments in the analysis.
 #'
 #' @return Updated 'dpoa' data frame, now including the additional columns: 'n_runs' (total
-#'         successful runs per phosphosite), 'n_ctr' (number of control samples per phosphosite),
-#'         'n_cnd' and 'meansig_cnd' (count and mean signal of each treatment condition per phosphosite,
+#'         successful runs per phosphosite), 'p_mean' and 'p_sd' (signal mean and standard deviation 
+#'         for each phosphosite across all samples), 'n_ctr' (number of control samples per phosphosite), 
+#'         n_cnd' and 'meansig_cnd' (count and mean signal of each treatment condition per phosphosite,
 #'         respectively).
 #'
 add_dpoa_metrics <- function(data, mdat, dpoa, condition_col='condition', control_name='control') {
@@ -180,7 +181,11 @@ add_dpoa_metrics <- function(data, mdat, dpoa, condition_col='condition', contro
   }
   
   # Total runs per phosphosite (non-NA counts)
-  dpoa$n_runs <- rowSums(!is.na(data))
+  dpoa$n_runs <- rowSums(!is.na(data))[dpoa$phosphosite]
+  
+  # Distribution mean and std per phosphosite across all samples
+  dpoa$p_mean <- apply(data, 1, function(x) mean(x, na.rm = TRUE))[dpoa$phosphosite]
+  dpoa$p_sd <- apply(data, 1, function(x) sd(x, na.rm = TRUE))[dpoa$phosphosite]
   
   # Control samples: counts and mean signal
   control_samples <- which(mdat[[condition_col]] == control_name)

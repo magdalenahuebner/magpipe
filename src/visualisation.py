@@ -105,27 +105,27 @@ def plot_phosphosite_signal_dist(data, phosphosite):
     plt.show()
 
 
-def plot_distance_to_signal_dist(dpoa, phosphosite, perturbagen, na_error='control_missing'):
+def plot_distance_to_signal_dist(dpoa, phosphosite, condition, condition_col='condition', na_error='control_missing'):
     """
     Plot the signal distribution for a specific phosphosite and its signal intensity for a given condition.
 
     Parameters:
-    - dpoa (pd.DataFrame): DataFrame containing DPOA results including 'phosphosite', 'perturbagen', 'p_mean', 'p_sd', 'meansig_cnd', and 'meansig_ctr'.
+    - dpoa (pd.DataFrame): DataFrame containing DPOA results including 'phosphosite', condition_col, 'p_mean', 'p_sd', 'meansig_cnd', and 'meansig_ctr'.
     - phosphosite (str): The phosphosite identifier.
-    - perturbagen (str): The condition name.
+    - condition (str): The condition name.
     - signal_type (str): Type of signal to plot ('control' or 'condition').
     """
     # Extract distribution parameters
-    p_mean = dpoa.loc[(dpoa['phosphosite'] == phosphosite) & (dpoa['perturbagen'] == perturbagen), 'p_mean'].values[0]
-    p_sd = dpoa.loc[(dpoa['phosphosite'] == phosphosite) & (dpoa['perturbagen'] == perturbagen), 'p_sd'].values[0]
+    p_mean = dpoa.loc[(dpoa['phosphosite'] == phosphosite) & (dpoa[condition_col] == condition), 'p_mean'].values[0]
+    p_sd = dpoa.loc[(dpoa['phosphosite'] == phosphosite) & (dpoa[condition_col] == condition), 'p_sd'].values[0]
 
     # Define the signal intensity based on the NA error case
     if na_error == 'control_missing':
         signal = 'condition'
-        signal_intensity = dpoa.loc[(dpoa['phosphosite'] == phosphosite) & (dpoa['perturbagen'] == perturbagen), 'meansig_cnd'].values[0]
+        signal_intensity = dpoa.loc[(dpoa['phosphosite'] == phosphosite) & (dpoa[condition_col] == condition), 'meansig_cnd'].values[0]
     elif na_error == 'condition_missing':
         signal = 'control'
-        signal_intensity = dpoa.loc[(dpoa['phosphosite'] == phosphosite) & (dpoa['perturbagen'] == perturbagen), 'meansig_ctr'].values[0]
+        signal_intensity = dpoa.loc[(dpoa['phosphosite'] == phosphosite) & (dpoa[condition_col] == condition), 'meansig_ctr'].values[0]
 
     # Plot normal distribution curve
     x = np.linspace(p_mean - 4*p_sd, p_mean + 4*p_sd, 1000)
@@ -135,9 +135,9 @@ def plot_distance_to_signal_dist(dpoa, phosphosite, perturbagen, na_error='contr
 
     # Highlight the mean signal intensity and the specific signal intensity of the condition of interest
     plt.axvline(p_mean, color='red', linestyle='dashed', linewidth=2, label=f'Mean Signal Intensity ({phosphosite})')
-    plt.axvline(x=signal_intensity, color='steelblue', linestyle='dashed', linewidth=2, label=f'Mean Signal Intensity ({signal})')
+    plt.axvline(x=signal_intensity, color='green', linestyle='dashed', linewidth=2, label=f'Mean Signal Intensity ({signal})')
 
-    title = f'Signal Distribution for {phosphosite}, {perturbagen} ({signal}: {signal_intensity})'
+    title = f'Signal Distribution for {phosphosite}, {condition} ({signal}: {signal_intensity})'
     plt.title(title)
     plt.xlabel('Signal Intensity (log2(AUP))')
     plt.ylabel('Density')

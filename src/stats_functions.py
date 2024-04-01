@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+import random
+
+from scipy.stats import norm
 
 
 def median_scaling(df, target_median=None):
@@ -40,3 +43,50 @@ def z_score(fc, dist_mean, n, dist_std):
     - Z-score.
     """
     return (fc - dist_mean) * np.sqrt(n) / dist_std
+
+
+def get_pvalue(z):
+    """
+    Converts a Z-score to a corresponding p-value, reflecting the probability of observing such a value under the normal distribution.
+
+    Parameters:
+    - z: The Z-score to be converted.
+
+    Returns:
+    - float: The p-value corresponding to the Z-score.
+    """
+    return norm.cdf(z) if z < 0 else 1.0 - norm.cdf(z)
+    
+
+def exp_func(x, a, b, c):
+    """
+    Exponential function used for curve fitting, specifically fitting the standard deviation of fold changes.
+
+    Parameters:
+    - x: The independent variable, typically mean signal intensity.
+    - a, b, c: Parameters of the exponential function to be optimized during curve fitting.
+
+    Returns:
+    - The value of the exponential function for a given x.
+    """
+    return a * b ** x + c
+
+
+def random_fc(row):
+    """
+    Calculates an artificial fold change for a row by randomly dividing the measurements into two groups, then calculating the difference in their means.
+
+    Parameters:
+    - row (pd.Series): A row from the DataFrame, representing signal intensities for a single feature across different samples.
+
+    Returns:
+    - float: An artificial fold change calculated from the row data.
+    """
+    fcs = list()
+    for _ in range(100):
+        random.shuffle(row)
+        g1 = row[:int(len(row) / 2)]
+        g2 = row[int(len(row) / 2):]
+        fcs.append(abs(np.mean(g1) - np.mean(g2)))
+    fc = np.nanmean(fcs)
+    return fc

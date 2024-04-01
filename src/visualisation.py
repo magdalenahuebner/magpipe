@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 
 from scipy.stats import norm
 
+from src.stats_functions import exp_func
+
 
 def plot_qc_samples(df, p_quant=0.6, save_path=None):
     """
@@ -140,4 +142,88 @@ def plot_distance_to_signal_dist(dpoa, phosphosite, perturbagen, na_error='contr
     plt.xlabel('Signal Intensity (log2(AUP))')
     plt.ylabel('Density')
     plt.legend()
+    plt.show()
+
+
+def plot_error_model(x, y, fit_data, mean_fit, std_fit, save_path=None):
+    """
+    Plot the error model fitted to the mean fold changes and standard deviations.
+
+    Parameters:
+    - x (np.array): Array of signal means.
+    - y (np.array): Array of fold changes.
+    - fit_data (dict): Dictionary containing the binned metrics for fitting the error model.
+    - mean_fit (LinearRegression): Fitted linear regression model for the mean fold changes.
+    - std_fit (tuple): Fitted parameters for the exponential function of the standard deviations.
+    - save_path (str, optional): Path to save the plot. If None, the plot is displayed directly.
+    """
+    # Remove NaN values for plotting
+    y.dropna(inplace=True)
+    x = x.loc[y.index]
+
+    # Plot the error model
+    plt.figure(figsize=(8, 6))
+    plt.plot(x, y, 'y.', linewidth=2, label='Fold change / feature')  # Plot the data points
+    plt.plot(fit_data['signal_means'], fit_data['fc_means'], 'r.', label='Mean (fcs) @ signal')  # Plot the mean fold changes
+    plt.plot(fit_data['signal_means'], fit_data['fc_stds'], 'b.', label='Std (fcs) @ signal')  # Plot the standard deviations
+    plt.plot(x, mean_fit.predict(np.array(x).reshape(-1, 1)), color='red', linewidth=2)  # Plot the mean fit
+    plt.plot(x, exp_func(x, *std_fit), color='blue', linewidth=2)  # Plot the standard deviation fit
+
+    title = f'Error Model Fitting for Mean Fold Changes and Standard Deviations'
+    plt.title(title)
+    plt.xlabel('Signal Intensity (log2(AUP))')
+    plt.ylabel('Fold Change (calculated between groups of control samples)')
+    plt.legend()
+    
+    if save_path:
+        plt.savefig(save_path)
+        logging.info(f"Error model plot saved to {save_path}")
+    else:
+        plt.show()
+
+
+def plot_signal_dependent_fc_significance(dpoa, phosphosite, condition, mean_fit, std_fit, condition_col='condition', na_error=None):
+    """
+    Illustrates the deviation of a specific phosphosite's fold change from the error model. It plots the distribution curve of 
+    fold change errors and marks the actual fold change, showing its deviation from expected variability.
+
+    Parameters:
+    - dpoa (pd.DataFrame): DataFrame containing DPOA results with calculated fold changes and error annotations.
+    - phosphosite (str): Phosphosite identifier.
+    - condition (str): Experimental condition name.
+    - mean_fit (LinearRegression model): Model for predicting mean fold change based on signal intensity.
+    - std_fit (tuple): Parameters for the model predicting standard deviation of fold changes.
+    - condition_col (str): Column in dpoa that specifies the condition of samples. Default is 'condition'.
+    - na_error (str, optional): Specifies the type of NA error case if relevant. Default is None.
+    """
+    # Define the signal intensity based on the NA error case
+    if na_error == 'condition_missing':
+        signal = 'mean_signal'
+        signal_intensity = dpoa.loc[(dpoa['phosphosite'] == phosphosite) & (dpoa[condition_col] == condition), 'p_mean'].values[0]
+    else:
+        signal = 'condition'
+        signal_intensity = dpoa.loc[(dpoa['phosphosite'] == phosphosite) & (dpoa[condition_col] == condition), 'meansig_cnd'].values[0]
+
+    # Extract fold change error distribution parameters at each observed signal intensity
+    fc_mean = mean_fit.predict(np.array(signal_intensity).reshape(-1, 1))[0][0]
+    fc_sd = exp_func(signal_intensity, *std_fit)
+
+    # Exctract fold change for the specific phosphosite and condition
+    fc = dpoa.loc[(dpoa['phosphosite'] == phosphosite) & (dpoa[condition_col] == condition), 'fold_change'].values[0]
+
+    # Plot normal distribution curve
+    x = np.linspace(fc_mean - 4*fc_sd, fc_mean + 4*fc_sd, 1000)
+    p = norm.pdf(x, fc_mean, fc_sd)
+    plt.figure(figsize=(10, 6))
+    plt.plot(x, p, 'k', linewidth=2, label='Fold Change Error Distribution')
+
+    # Highlight the mean fold change and the specific fold change of the condition of interest
+    plt.axvline(fc_sd, color='steelblue', linestyle='dashed', linewidth=2, label=f'Standard Dev (FCs) @ Signal Intensity ({signal_intensity:.2f})')
+    plt.axvline(x=abs(fc), color='green', linestyle='dashed', linewidth=2, label=f'Fold Change ({phosphosite})')
+
+    title = f'Fold Change Error Distribution for {phosphosite}, {condition} ({signal}: {signal_intensity:.2f})'
+    plt.title(title)
+    plt.xlabel('Absolute Fold Change (log2)')
+    plt.ylabel('Density')
+    plt.legend(loc='upper left')
     plt.show()

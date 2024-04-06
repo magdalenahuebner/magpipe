@@ -9,15 +9,17 @@ import src.dpoa_processing as dpop
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def process_dpoa_results(aup_data_path, dpoa_path, results_path, output_dir, plot_dir):
+def process_dpoa_results(aup_data_path, metadata_path, dpoa_path, results_path, output_dir, plot_dir):
     """
     Processes the results from Differential Phosphosite Occupancy Analysis (DPOA) by
     estimating missing fold changes for phosphosites with insufficient data and calculating
     Signal Intensity-Dependent Confidence Scores (SID-Scores).
 
     Parameters:
-    - aup_data_path: Path to the CSV file containing the signal intensities.
-    - dpoa_path: Path to the CSV file containing DPOA results.
+    - aup_data_path: Path to the TSV file containing the signal intensities.
+    - metadata_path: Path to the TSV file containing metadata for the samples. The first column must match the sample
+                     names used in the AUP data file's columns.
+    - dpoa_path: Path to the TSV file containing DPOA results.
     - results_path: Path where the processed DPOA results will be saved.
     - output_dir: Directory to save or load pre-calculated or intermediate results.
     - plot_dir: Directory where all generated plots will be saved
@@ -32,7 +34,7 @@ def process_dpoa_results(aup_data_path, dpoa_path, results_path, output_dir, plo
     dpoa = pd.read_csv(dpoa_path, sep='\t')
 
     logging.info("Loading metadata.")
-    metadata = pd.read_csv('resources/raw_data/metadata.tsv', sep='\t', index_col=0)
+    metadata = pd.read_csv(metadata_path, sep='\t', index_col=0)
 
     # Step 1: Estimate missing fold changes
     # A: Cases where measurements are absent (mostly NA values) across control samples and all conditions have already been removed
@@ -63,9 +65,9 @@ def process_dpoa_results(aup_data_path, dpoa_path, results_path, output_dir, plo
     dpoa.to_csv(results_path, sep='\t', index=False)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 6:
-        logging.error("Usage: python process_dpoa_results.py <aup_data_path> <dpoa_path> <results_path> <output_dir> <plot_dir>")
+    if len(sys.argv) != 7:
+        logging.error("Usage: python process_dpoa_results.py <aup_data_path> <metadata_path> <dpoa_path> <results_path> <output_dir> <plot_dir>")
         sys.exit(1)
 
-    aup_data_path, dpoa_path, results_path, output_dir, plot_dir = sys.argv[1:]
-    process_dpoa_results(aup_data_path, dpoa_path, results_path, output_dir, plot_dir)
+    aup_data_path, metadata_path, dpoa_path, results_path, output_dir, plot_dir = sys.argv[1:]
+    process_dpoa_results(aup_data_path, metadata_path, dpoa_path, results_path, output_dir, plot_dir)

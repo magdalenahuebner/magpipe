@@ -97,3 +97,4 @@ workspace/
 resources/
 results/
 sandbox/
+.snakemake/

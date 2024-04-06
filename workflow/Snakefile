@@ -2,3 +2,59 @@
 # Please follow the best practices: 
 # https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
 # in particular regarding the standardized folder structure mentioned there. 
+
+
+rule all:
+    input:
+        'results/phosphodata_magpipe_results.tsv'
+
+rule perform_id_mapping:
+    input:
+        data='resources/raw_data/phosphodata_aup.tsv',
+        idmap_path='resources/external/mapped_hgnc_symbols.tsv'
+    output:
+        id_mapped='workspace/id_mapped_data.tsv'
+    shell:
+        'python workflow/scripts/perform_id_mapping.py {input.data} {input.idmap_path} {output.id_mapped}'
+
+rule preprocess_data:
+    input:
+        data='workspace/id_mapped_data.tsv',
+        metadata='resources/raw_data/metadata.tsv'
+    output:
+        processed='workspace/preprocessed_data.tsv'
+    shell:
+        'python workflow/scripts/preprocess_data.py {input.data} {input.metadata} {output.processed}'
+
+rule perform_qc_and_normalise:
+    input:
+        data='workspace/preprocessed_data.tsv',
+        metadata='resources/raw_data/metadata.tsv'
+    output:
+        qc_normalised='workspace/normalised_data.tsv'
+    params:
+        plot_dir='reports/figures/'
+    shell:
+        'python workflow/scripts/perform_qc_and_normalise.py {input.data} {input.metadata} {output.qc_normalised} {params.plot_dir}'
+
+rule run_dpo_analysis:
+    input:
+        data='workspace/normalised_data.tsv',
+        metadata='resources/raw_data/metadata.tsv'
+    output:
+        dpoa_results='workspace/phosphodata_dpoa.tsv'
+    script:
+        'scripts/run_dpo_analysis.R'
+
+rule process_dpoa_results:
+    input:
+        data='workspace/normalised_data.tsv',
+        metadata='resources/raw_data/metadata.tsv',
+        dpoa='workspace/phosphodata_dpoa.tsv'
+    output:
+        magpipe_results='results/phosphodata_magpipe_results.tsv',
+    params:
+        output_dir='workspace/',
+        plot_dir='reports/figures/'
+    shell:
+        'python workflow/scripts/process_dpoa_results.py {input.data} {input.metadata} {input.dpoa} {output.magpipe_results} {params.output_dir} {params.plot_dir}'

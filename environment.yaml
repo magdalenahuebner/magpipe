@@ -6,6 +6,18 @@ channels:
 dependencies:
   - python=3
   - snakemake
+  - pandas
+  - numpy
+  - matplotlib
+  - pickle
+  - requests
+  - scipy
+  - scikit-learn
+  - tqdm
+  - r-limma
+  - r-reshape2
+  - r-plyr
   - pip
   - pip:
+    - uniprot-id-mapper==1.1.1
     - -e .   # make src modules available locally

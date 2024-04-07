@@ -94,7 +94,10 @@ target/
 
 # workflow-specific directories
 workspace/
-resources/
+resources/external/*
+resources/raw_data/*
+!resources/external/.gitkeep
+!resources/raw_data/.gitkeep
 results/
 sandbox/
 .snakemake/

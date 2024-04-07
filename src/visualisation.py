@@ -40,29 +40,32 @@ def plot_qc_samples(df, p_quant=0.6, save_path=None):
 
 def plot_normalisation_boxplots(df, df_norm, save_path=None):
     """
-    Generates boxplots for each sample in the DataFrame.
+    Generates boxplots for each sample in the DataFrame before and after normalisation.
 
     Parameters:
-    - df (pd.DataFrame): DataFrame containing the data. Rows represent features, and columns represent samples.
-    - title (str): Title of the plot.
+    - df (pd.DataFrame): DataFrame containing the original data. Rows represent features, and columns represent samples.
+    - df_norm (pd.DataFrame): DataFrame containing the normalized data.
+    - save_path (str, optional): Path to save the figure. If not provided, the figure is displayed.
     """
-    # Create boxplots for the original data
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(12, 12))  # Adjust the figure size to accommodate both plots
+
+    # Plot for the original data
+    plt.subplot(2, 1, 1)  # This means 2 rows, 1 column, and this is the first plot.
     df.boxplot(rot=90, fontsize=8)
     plt.title('Before Normalisation')
-    plt.ylabel('Area under the Peak (AUP)')  # Rotate and resize sample names for better readability
-    plt.tight_layout()  # Adjust layout to make room for the rotated x-axis labels
+    plt.ylabel('Area under the Peak (AUP)')
 
-    # Create boxplots for the normalised data
-    plt.figure(figsize=(12, 6))
+    plt.tight_layout(pad=3.0)  # Adjust layout with pad for space between plots
+
+    # Plot for the normalized data
+    plt.subplot(2, 1, 2)  # This means 2 rows, 1 column, and this is the second plot.
     df_norm.boxplot(rot=90, fontsize=8)
     plt.title('After Normalisation')
-    plt.ylabel('Area under the Peak (AUP)')  # Rotate and resize sample names for better readability
-    plt.tight_layout()  # Adjust layout to make room for the rotated x-axis labels
+    plt.ylabel('Area under the Peak (AUP)')
 
     if save_path:
         plt.savefig(save_path)
-        logging.info(f"QC plots saved to {save_path}")
+        logging.info(f"Plot saved to {save_path}")
     else:
         plt.show()
 

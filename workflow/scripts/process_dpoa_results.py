@@ -4,7 +4,7 @@ import pandas as pd
 import logging
 import os
 
-import src.dpoa_processing as dpop
+import src.magpipe.dpoa_processing as dpop
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

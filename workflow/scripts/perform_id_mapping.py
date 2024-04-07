@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import logging
 
-import src.id_mapping as idm
+import src.magpipe.id_mapping as idm
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

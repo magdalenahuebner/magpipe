@@ -4,7 +4,7 @@ import pandas as pd
 import logging
 import os
 
-import src.qc_and_normalisation as qcn
+import src.magpipe.qc_and_normalisation as qcn
 
 # Configure logging to display messages of level INFO and higher
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

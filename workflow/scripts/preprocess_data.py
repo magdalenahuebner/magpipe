@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import logging
 
-import src.data_wrangling as dw
+import src.magpipe.data_wrangling as dw
 
 # Configure logging to display messages of level INFO and higher
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

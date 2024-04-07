@@ -8,15 +8,15 @@ dependencies:
   - snakemake
   - pandas
   - numpy
+  - ipykernel
   - matplotlib
-  - pickle
   - requests
   - scipy
   - scikit-learn
   - tqdm
-  - r-limma
   - r-reshape2
   - r-plyr
+  - bioconductor-limma
   - pip
   - pip:
     - uniprot-id-mapper==1.1.1

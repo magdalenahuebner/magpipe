@@ -20,7 +20,7 @@ MagPipe was created with [cookiecutter-bioinformatics-project](https://github.co
 
 1. **Clone the MagPipe repository:**
 ```bash
-git clone https://github.com/magdalenahuebner/magpipe.git
+git clone git@github.com:magdalenahuebner/magpipe.git
 cd magpipe
 ```
 
@@ -30,12 +30,12 @@ conda env create -f environment.yaml
 conda activate magpipe
 ```
 
-3. **Customise:**
-Add you data to folder. Make sure formatted correctly (link to next section). And that paths in the snakemake file are correct and name of replcate name of your data. You can also run multiple samples at the same time (link)
+3. **Import your data:**
+Add your phosphoproteomics data and corresponding metadata to `resources/raw_data`. Make sure the data is formatted correctly (see [Input File Formatting](#input-file-formatting)). Edit the Snakefile in `workflow/Snakefile` and replace `phosphodata_aup.tsv` and `metadata.tsv` with the names of your data and metadata files.
 
 4. **Execute the pipeline:**
 ```bash
-snakemake --cores all
+snakemake --cores 1
 ```
 
 ### Alternative: Using MagPipe as a Module
@@ -43,12 +43,16 @@ MagPipe can also be integrated into your Python projects as a module:
 
 1. **Install MagPipe:**
 ```bash
-pip install git+https://github.com/magdalenahuebner/magpipe.git
+python -m pip install git+https://github.com/magdalenahuebner/magpipe.git
 ```
 
+2. **Import as library:**
+```python
+import magpipe
+```
 ## Input File Formatting
 
-Under construction...
+Input files should be in TSV format. The phosphoproteomics dataset file should contain the quantified phosphosites (e.g. area under the peak values from MS1 spectra) formatted with phosphosite names as rows and samples as columns. The metadata file should contain a column named 'sampleID', with sample names/IDs corresponding to the column names of the phosphoproteomics data.
 
 ## Workflow Overview
 
@@ -56,4 +60,4 @@ The MagPipe workflow encompasses several critical steps:
 
 ![Workflow Diagram](img/dag.png "Workflow Overview")
 
-Under construction...
+A more detailed explanation of the workflow is provided in a collection of Jupyter notebooks, which can be found in `notebooks/`.
